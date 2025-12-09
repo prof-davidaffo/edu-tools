@@ -25,31 +25,64 @@ function renderChips(container, items) {
 
 // ----- Pagine e launcher -----
 const viewState = {
-  page: 'docente',
+  page: 'studenti',
   selected: {
     docente: 'exhaustive',
     studenti: 'timer'
+  },
+  subcat: {
+    docente: 'estrazione',
+    studenti: 'tempo'
   }
 };
 
+function filterBySubcategory(page, subcat) {
+  viewState.subcat[page] = subcat;
+  document.querySelectorAll(`.subcat-btn[data-page="${page}"], .subcat-card[data-page="${page}"]`).forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.subcategory === subcat);
+  });
+  document.querySelectorAll(`.app-card[data-page="${page}"]`).forEach((btn) => {
+    const match = btn.dataset.subcategory === subcat;
+    btn.classList.toggle('hidden', !match);
+    if (!match) btn.classList.remove('active');
+  });
+  const visibleCards = Array.from(document.querySelectorAll(`.tool-card[data-page="${page}"]`)).filter(
+    (card) => card.dataset.subcategory === subcat
+  );
+  document.querySelectorAll(`.tool-card[data-page="${page}"]`).forEach((card) => {
+    card.classList.toggle('hidden', card.dataset.subcategory !== subcat);
+  });
+  if (visibleCards.length && !visibleCards.some((c) => c.dataset.tool === viewState.selected[page])) {
+    selectTool(page, visibleCards[0].dataset.tool, false);
+  } else {
+    selectTool(page, viewState.selected[page], false);
+  }
+}
+
 function activatePage(page) {
   viewState.page = page;
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
+  document.querySelectorAll('[data-page-btn]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.pageBtn === page);
   });
   document.querySelectorAll('.page').forEach((section) => {
     section.classList.toggle('active', section.dataset.page === page);
   });
-  selectTool(page, viewState.selected[page]);
+  filterBySubcategory(page, viewState.subcat[page]);
 }
 
-function selectTool(page, tool) {
+function selectTool(page, tool, updateSubcat = true) {
+  const card = document.querySelector(`.tool-card[data-page="${page}"][data-tool="${tool}"]`);
+  if (!card) return;
+  const subcat = card.dataset.subcategory;
   viewState.selected[page] = tool;
+  if (updateSubcat) {
+    filterBySubcategory(page, subcat);
+  }
   document.querySelectorAll(`.app-card[data-page="${page}"]`).forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.tool === tool);
   });
-  document.querySelectorAll(`.tool-card[data-page="${page}"]`).forEach((card) => {
-    card.classList.toggle('active', card.dataset.tool === tool);
+  document.querySelectorAll(`.tool-card[data-page="${page}"]`).forEach((c) => {
+    c.classList.toggle('active', c.dataset.tool === tool);
   });
 }
 
@@ -60,6 +93,10 @@ function initNavigation() {
 
   document.querySelectorAll('.app-card').forEach((card) => {
     card.addEventListener('click', () => selectTool(card.dataset.page, card.dataset.tool));
+  });
+
+  document.querySelectorAll('.subcat-btn, .subcat-card').forEach((btn) => {
+    btn.addEventListener('click', () => filterBySubcategory(btn.dataset.page, btn.dataset.subcategory));
   });
 }
 
@@ -575,14 +612,351 @@ function initAverageCalculator() {
   render();
 }
 
+// ----- Conversione basi -----
+function parseInBase(value, base) {
+  const symbols = '0123456789ABCDEF';
+  const clean = value.trim().toUpperCase();
+  if (!clean) throw new Error('Inserisci un numero.');
+  if (base < 2 || base > 16) throw new Error('Base fuori range 2-16.');
+  let negative = false;
+  let idx = 0;
+  if (clean[0] === '-') {
+    negative = true;
+    idx = 1;
+  }
+  let total = 0n;
+  for (; idx < clean.length; idx += 1) {
+    const ch = clean[idx];
+    const digit = symbols.indexOf(ch);
+    if (digit < 0 || digit >= base) throw new Error(`Cifra non valida per base ${base}: ${ch}`);
+    total = total * BigInt(base) + BigInt(digit);
+  }
+  return negative ? -total : total;
+}
+
+function toBaseString(value, base) {
+  const symbols = '0123456789ABCDEF';
+  if (base < 2 || base > 16) throw new Error('Base fuori range 2-16.');
+  let n = value;
+  if (n === 0n) return '0';
+  const negative = n < 0;
+  if (negative) n = -n;
+  let out = '';
+  while (n > 0) {
+    const digit = Number(n % BigInt(base));
+    out = symbols[digit] + out;
+    n /= BigInt(base);
+  }
+  return negative ? `-${out}` : out;
+}
+
+function initBaseConverter() {
+  const inputEl = document.getElementById('baseconv-input');
+  const fromEl = document.getElementById('baseconv-from');
+  const toEl = document.getElementById('baseconv-to');
+  const runBtn = document.getElementById('baseconv-run');
+  const swapBtn = document.getElementById('baseconv-swap');
+  const outputEl = document.getElementById('baseconv-output');
+  const tableEl = document.getElementById('baseconv-table');
+
+  function renderTable(valueBig) {
+    const bases = [2, 8, 10, 16];
+    const rows = bases
+      .map((b) => `<tr><td>Base ${b}</td><td><code>${toBaseString(valueBig, b)}</code></td></tr>`)
+      .join('');
+    tableEl.innerHTML = `<table><tbody>${rows}</tbody></table>`;
+  }
+
+  function convert() {
+    try {
+      const fromBase = Number(fromEl.value);
+      const toBase = Number(toEl.value);
+      const valueBig = parseInBase(inputEl.value, fromBase);
+      const converted = toBaseString(valueBig, toBase);
+      outputEl.textContent = `${inputEl.value.trim()} (base ${fromBase}) = ${converted} (base ${toBase})`;
+      renderTable(valueBig);
+    } catch (err) {
+      outputEl.textContent = err.message;
+      tableEl.innerHTML = '';
+    }
+  }
+
+  function swap() {
+    const a = fromEl.value;
+    fromEl.value = toEl.value;
+    toEl.value = a;
+    convert();
+  }
+
+  runBtn.addEventListener('click', convert);
+  swapBtn.addEventListener('click', swap);
+}
+
+// ----- Operazioni binarie -----
+function initBinOps() {
+  const aEl = document.getElementById('binops-a');
+  const bEl = document.getElementById('binops-b');
+  const opEl = document.getElementById('binops-op');
+  const runBtn = document.getElementById('binops-run');
+  const clearBtn = document.getElementById('binops-clear');
+  const outputEl = document.getElementById('binops-output');
+
+  function toBinStr(n) {
+    return n.toString(2);
+  }
+
+  function run() {
+    try {
+      const a = parseInBase(aEl.value, 2);
+      const b = parseInBase(bEl.value, 2);
+      let res = 0n;
+      if (opEl.value === 'add') {
+        res = a + b;
+      } else {
+        res = a - b;
+      }
+      outputEl.textContent = [
+        `A: ${toBinStr(a)} (${a.toString(10)})`,
+        `B: ${toBinStr(b)} (${b.toString(10)})`,
+        `${opEl.value === 'add' ? 'A + B' : 'A - B'} = ${toBinStr(res)} (${res.toString(10)})`
+      ].join('\\n');
+    } catch (err) {
+      outputEl.textContent = err.message;
+    }
+  }
+
+  function clear() {
+    aEl.value = '';
+    bEl.value = '';
+    outputEl.textContent = 'Inserisci A e B, poi Calcola.';
+  }
+
+  runBtn.addEventListener('click', run);
+  clearBtn.addEventListener('click', clear);
+}
+
+// ----- Complemento a 2 -----
+function toComplement2(value, bits) {
+  const max = (1n << BigInt(bits - 1)) - 1n;
+  const min = -(1n << BigInt(bits - 1));
+  if (value > max || value < min) throw new Error(`Fuori intervallo per ${bits} bit: da ${min} a ${max}`);
+  if (value >= 0) {
+    const bin = value.toString(2).padStart(bits, '0');
+    return bin.slice(-bits);
+  }
+  const mod = (1n << BigInt(bits));
+  const bin = (mod + value).toString(2).padStart(bits, '0');
+  return bin.slice(-bits);
+}
+
+function fromComplement2(binStr, bits) {
+  const clean = binStr.replace(/\\s+/g, '');
+  if (!clean.match(/^[01]+$/)) throw new Error('Inserisci solo bit 0/1.');
+  const padded = clean.padStart(bits, clean[0]);
+  const unsigned = BigInt('0b' + padded);
+  const sign = padded[0] === '1';
+  if (!sign) return unsigned;
+  const mod = 1n << BigInt(bits);
+  return unsigned - mod;
+}
+
+function initComplementTwo() {
+  const decEl = document.getElementById('comp2-decimal');
+  const bitsEl = document.getElementById('comp2-bits');
+  const binEl = document.getElementById('comp2-binary');
+  const encBtn = document.getElementById('comp2-encode');
+  const decBtn = document.getElementById('comp2-decode');
+  const outputEl = document.getElementById('comp2-output');
+
+  function encode() {
+    try {
+      const value = BigInt(decEl.value);
+      const bits = Number(bitsEl.value);
+      if (!Number.isFinite(bits) || bits < 2) throw new Error('Bit non validi.');
+      const bin = toComplement2(value, bits);
+      const max = (1n << BigInt(bits - 1)) - 1n;
+      const min = -(1n << BigInt(bits - 1));
+      outputEl.textContent = `${value} su ${bits} bit -> ${bin}\\nIntervallo: [${min}, ${max}]`;
+      binEl.value = bin;
+    } catch (err) {
+      outputEl.textContent = err.message;
+    }
+  }
+
+  function decode() {
+    try {
+      const bits = Number(bitsEl.value);
+      if (!Number.isFinite(bits) || bits < 2) throw new Error('Bit non validi.');
+      const value = fromComplement2(binEl.value || '', bits);
+      const max = (1n << BigInt(bits - 1)) - 1n;
+      const min = -(1n << BigInt(bits - 1));
+      outputEl.textContent = `${binEl.value.trim() || '(vuoto)'} su ${bits} bit -> ${value}\\nIntervallo: [${min}, ${max}]`;
+      decEl.value = value.toString();
+    } catch (err) {
+      outputEl.textContent = err.message;
+    }
+  }
+
+  encBtn?.addEventListener('click', encode);
+  decBtn?.addEventListener('click', decode);
+}
+
+// ----- IEEE 754 single -----
+function floatToHex32(value) {
+  const buffer = new ArrayBuffer(4);
+  const view = new DataView(buffer);
+  view.setFloat32(0, Number(value));
+  const hex = Array.from(new Uint8Array(buffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  return hex;
+}
+
+function hexToFloat32(hexOrBin) {
+  let clean = hexOrBin.replace(/\\s+/g, '');
+  if (clean.length === 32 && /^[01]+$/.test(clean)) {
+    // convert binary to hex
+    clean = parseInt(clean, 2).toString(16).padStart(8, '0');
+  }
+  if (!clean.match(/^[0-9a-fA-F]{8}$/)) throw new Error('Inserisci 8 cifre hex o 32 bit binari.');
+  const buffer = new ArrayBuffer(4);
+  const view = new DataView(buffer);
+  for (let i = 0; i < 4; i += 1) {
+    const byte = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+    view.setUint8(i, byte);
+  }
+  return view.getFloat32(0);
+}
+
+function hexToBin(hex) {
+  return hex
+    .split('')
+    .map((c) => parseInt(c, 16).toString(2).padStart(4, '0'))
+    .join('');
+}
+
+function initIeee754() {
+  const decEl = document.getElementById('ieee-decimal');
+  const hexEl = document.getElementById('ieee-hex');
+  const encBtn = document.getElementById('ieee-encode');
+  const decBtn = document.getElementById('ieee-decode');
+  const outputEl = document.getElementById('ieee-output');
+  const bitsContainer = document.getElementById('ieee-bits');
+  const applyBitsBtn = document.getElementById('ieee-apply-bits');
+  const bitToggles = [];
+
+  function describeBits(hex) {
+    const bin = hexToBin(hex).padStart(32, '0');
+    const sign = bin.slice(0, 1);
+    const exp = bin.slice(1, 9);
+    const mant = bin.slice(9);
+    return `Segno: ${sign} | Esponente: ${exp} | Mantissa: ${mant}`;
+  }
+
+  function buildBitsUI() {
+    if (!bitsContainer) return;
+    const rows = {
+      sign: { count: 1, node: bitsContainer.querySelector('[data-section="sign"]') },
+      exp: { count: 8, node: bitsContainer.querySelector('[data-section="exp"]') },
+      mant: { count: 23, node: bitsContainer.querySelector('[data-section="mant"]') }
+    };
+    Object.entries(rows).forEach(([key, cfg]) => {
+      cfg.node.querySelectorAll('.bit-toggle').forEach((el) => el.remove());
+      for (let i = 0; i < cfg.count; i += 1) {
+        const span = document.createElement('span');
+        span.className = 'bit-toggle';
+        span.dataset.section = key;
+        span.dataset.index = i;
+        span.textContent = '0';
+        span.addEventListener('click', () => {
+          const isOn = span.classList.toggle('on');
+          span.textContent = isOn ? '1' : '0';
+        });
+        cfg.node.appendChild(span);
+        bitToggles.push(span);
+      }
+    });
+  }
+
+  function setBitsFromBinary(bin) {
+    const clean = bin.padStart(32, '0').slice(0, 32);
+    bitToggles.forEach((toggle, idx) => {
+      const bit = clean[idx] === '1';
+      toggle.classList.toggle('on', bit);
+      toggle.textContent = bit ? '1' : '0';
+    });
+  }
+
+  function getBitsBinary() {
+    return bitToggles.map((toggle) => (toggle.classList.contains('on') ? '1' : '0')).join('');
+  }
+
+  function encode() {
+    try {
+      const val = Number(decEl.value);
+      if (!Number.isFinite(val)) throw new Error('Inserisci un numero decimale valido.');
+      const hex = floatToHex32(val);
+      outputEl.textContent = `${val} -> 0x${hex}\n${describeBits(hex)}`;
+      hexEl.value = hex;
+      setBitsFromBinary(hexToBin(hex));
+    } catch (err) {
+      outputEl.textContent = err.message;
+    }
+  }
+
+  function decode() {
+    try {
+      const val = hexToFloat32(hexEl.value);
+      const hex = floatToHex32(val);
+      outputEl.textContent = `${hexEl.value.trim()} -> ${hexToBin(hex)}\n${describeBits(hex)}\nValore: ${val}`;
+      decEl.value = val;
+      setBitsFromBinary(hexToBin(hex));
+    } catch (err) {
+      outputEl.textContent = err.message;
+    }
+  }
+
+  function applyBits() {
+    try {
+      const bin = getBitsBinary();
+      const hex = parseInt(bin, 2).toString(16).padStart(8, '0');
+      hexEl.value = hex;
+      const val = hexToFloat32(hex);
+      decEl.value = val;
+      outputEl.textContent = `${bin}\n${describeBits(hex)}\nValore: ${val}`;
+    } catch (err) {
+      outputEl.textContent = err.message;
+    }
+  }
+
+  buildBitsUI();
+  encBtn?.addEventListener('click', encode);
+  decBtn?.addEventListener('click', decode);
+  applyBitsBtn?.addEventListener('click', applyBits);
+}
+
 // ----- Service worker -----
 function registerServiceWorker() {
+  // Disabilitato: i service worker precedenti hanno causato blocchi.
+  return;
+}
+
+async function clearServiceWorkersAndCaches() {
   if (!('serviceWorker' in navigator)) return;
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch((err) => {
-      console.error('SW registration failed', err);
-    });
-  });
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map((r) => r.unregister()));
+  } catch (err) {
+    console.warn('SW unregister failed', err);
+  }
+  if (typeof caches !== 'undefined') {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    } catch (err) {
+      console.warn('Cache cleanup failed', err);
+    }
+  }
 }
 
 // ----- Init -----
@@ -594,6 +968,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initFormConverter();
   initTimer();
   initAverageCalculator();
-  registerServiceWorker();
-  activatePage('docente');
+  initBaseConverter();
+  initBinOps();
+  initComplementTwo();
+  initIeee754();
+  clearServiceWorkersAndCaches().finally(() => {
+    registerServiceWorker();
+  });
+  activatePage('studenti');
 });

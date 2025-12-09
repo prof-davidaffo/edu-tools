@@ -19,8 +19,6 @@
     <div class="brand">Edu Tools</div>
     <div class="top-actions">
       <span class="pill">PWA</span>
-      <button class="tab-btn active" data-page-btn="docente">Docente</button>
-      <button class="tab-btn" data-page-btn="studenti">Studenti</button>
     </div>
   </header>
 
@@ -29,9 +27,15 @@
       <p class="eyebrow">Raccolta strumenti</p>
       <h1>Strumenti didattici pronti all'uso</h1>
       <p class="lede">Benvenuto, qui potrai usare gli strumenti didattici del Prof. Davide Daffonchio. Ci sono sia strumenti per docenti che per studenti.</p>
-      <div class="hero__actions">
-        <button class="btn" data-page-btn="docente">Strumenti Docente</button>
-        <button class="btn ghost" data-page-btn="studenti">Strumenti Studente</button>
+      <div class="cat-switch">
+        <button class="app-card hero-cat active" data-page-btn="studenti">
+          <div class="app-icon">🎓</div>
+          <div><strong>Studente</strong></div>
+        </button>
+        <button class="app-card hero-cat" data-page-btn="docente">
+          <div class="app-icon">👨‍🏫</div>
+          <div><strong>Docente</strong></div>
+        </button>
       </div>
       <p class="install-hint">Suggerimento: aggiungi alla schermata Home per l'uso offline.</p>
     </div>
@@ -40,7 +44,7 @@
       <div class="hero__stats">
         <div>
           <span class="tiny">Strumenti</span>
-          <strong>6</strong>
+          <strong>8</strong>
         </div>
         <div>
           <span class="tiny">Categorie</span>
@@ -52,37 +56,54 @@
   </section>
 
   <main>
-    <section class="page active" id="page-docente" data-page="docente">
+    <section class="page" id="page-docente" data-page="docente">
       <div class="page-head">
         <div>
           <p class="eyebrow">Docente</p>
           <h2>Seleziona uno strumento</h2>
-          <p class="muted">Un launcher compatto: clicca un'icona per aprire solo lo strumento che ti serve.</p>
+        </div>
+        <div class="subcat-wrap">
+          <p class="subcat-title">Seleziona una categoria</p>
+          <div class="subcat-grid">
+            <button class="subcat-card active" data-page="docente" data-subcategory="estrazione">
+              <span class="subcat-icon">🎲</span>
+              <span class="subcat-text">Estrazione</span>
+            </button>
+            <button class="subcat-card" data-page="docente" data-subcategory="valutazione">
+              <span class="subcat-icon">📊</span>
+              <span class="subcat-text">Valutazione</span>
+            </button>
+            <button class="subcat-card" data-page="docente" data-subcategory="automazione">
+              <span class="subcat-icon">🧾</span>
+              <span class="subcat-text">Automazione</span>
+            </button>
+          </div>
+          <p class="subcat-title">Seleziona uno strumento</p>
         </div>
       </div>
       <div class="app-launcher">
-        <button class="app-card active" data-page="docente" data-tool="exhaustive">
+        <button class="app-card active" data-page="docente" data-tool="exhaustive" data-subcategory="estrazione">
           <div class="app-icon">🎲</div>
           <div>
             <strong>Estrazione ad esaurimento</strong>
             <p class="tiny">Ordine casuale 1..N</p>
           </div>
         </button>
-        <button class="app-card" data-page="docente" data-tool="targeted">
+        <button class="app-card" data-page="docente" data-tool="targeted" data-subcategory="estrazione">
           <div class="app-icon">🎯</div>
           <div>
             <strong>Estrazione mirata</strong>
             <p class="tiny">Liste classi salvate</p>
           </div>
         </button>
-        <button class="app-card" data-page="docente" data-tool="grade">
+        <button class="app-card" data-page="docente" data-tool="grade" data-subcategory="valutazione">
           <div class="app-icon">📊</div>
           <div>
             <strong>Conversione voto</strong>
             <p class="tiny">Scala /10 + correzione</p>
           </div>
         </button>
-        <button class="app-card" data-page="docente" data-tool="forms">
+        <button class="app-card" data-page="docente" data-tool="forms" data-subcategory="automazione">
           <div class="app-icon">🧾</div>
           <div>
             <strong>Text → Google Forms</strong>
@@ -92,7 +113,7 @@
       </div>
 
       <div class="tool-panels">
-        <article class="tool-card active" data-page="docente" data-tool="exhaustive">
+        <article class="tool-card active" data-page="docente" data-tool="exhaustive" data-subcategory="estrazione">
           <header>
             <div>
               <p class="eyebrow">Estrazione</p>
@@ -114,7 +135,7 @@
           <div class="chips drawn" id="exhaustive-output"></div>
         </article>
 
-        <article class="tool-card" data-page="docente" data-tool="targeted">
+        <article class="tool-card" data-page="docente" data-tool="targeted" data-subcategory="estrazione">
           <header>
             <div>
               <p class="eyebrow">Estrazione</p>
@@ -146,7 +167,7 @@
           <div class="chips drawn" id="targeted-output"></div>
         </article>
 
-        <article class="tool-card" data-page="docente" data-tool="grade">
+        <article class="tool-card" data-page="docente" data-tool="grade" data-subcategory="valutazione">
           <header>
             <div>
               <p class="eyebrow">Valutazione</p>
@@ -173,7 +194,7 @@
           <p class="tiny" id="grade-notes">Note: valori arrotondati a due decimali.</p>
         </article>
 
-        <article class="tool-card wide" data-page="docente" data-tool="forms">
+        <article class="tool-card wide" data-page="docente" data-tool="forms" data-subcategory="automazione">
           <header>
             <div>
               <p class="eyebrow">Automazione</p>
@@ -221,33 +242,79 @@ C. Blue-fin Tuna
       </div>
     </section>
 
-    <section class="page" id="page-studenti" data-page="studenti">
+    <section class="page active" id="page-studenti" data-page="studenti">
       <div class="page-head">
         <div>
           <p class="eyebrow">Studenti</p>
           <h2>Seleziona uno strumento</h2>
-          <p class="muted">Launcher essenziale per timer e media.</p>
+          <p class="muted">Subcategorie: tempo, valutazione, calcolo binario.</p>
+        </div>
+        <div class="subcat-wrap">
+          <p class="subcat-title">Seleziona una categoria</p>
+          <div class="subcat-grid">
+            <button class="subcat-card active" data-page="studenti" data-subcategory="tempo">
+              <span class="subcat-icon">⏱️</span>
+              <span class="subcat-text">Tempo</span>
+            </button>
+            <button class="subcat-card" data-page="studenti" data-subcategory="valutazione">
+              <span class="subcat-icon">📈</span>
+              <span class="subcat-text">Valutazione</span>
+            </button>
+            <button class="subcat-card" data-page="studenti" data-subcategory="binario">
+              <span class="subcat-icon">🔢</span>
+              <span class="subcat-text">Calcolo binario</span>
+            </button>
+          </div>
+          <p class="subcat-title">Seleziona uno strumento</p>
         </div>
       </div>
       <div class="app-launcher">
-        <button class="app-card active" data-page="studenti" data-tool="timer">
+        <button class="app-card active" data-page="studenti" data-tool="timer" data-subcategory="tempo">
           <div class="app-icon">⏱️</div>
           <div>
             <strong>Timer di concentrazione</strong>
             <p class="tiny">Focus/Pausa</p>
           </div>
         </button>
-        <button class="app-card" data-page="studenti" data-tool="average">
+        <button class="app-card" data-page="studenti" data-tool="average" data-subcategory="valutazione">
           <div class="app-icon">📈</div>
           <div>
             <strong>Calcolatore media</strong>
             <p class="tiny">Voti con peso</p>
           </div>
         </button>
+        <button class="app-card" data-page="studenti" data-tool="baseconv" data-subcategory="binario">
+          <div class="app-icon">🔢</div>
+          <div>
+            <strong>Conversione basi</strong>
+            <p class="tiny">2 ↔ 8 ↔ 10 ↔ 16</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="studenti" data-tool="binops" data-subcategory="binario">
+          <div class="app-icon">➕</div>
+          <div>
+            <strong>Operazioni binarie</strong>
+            <p class="tiny">Somma/Sottrai</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="studenti" data-tool="comp2" data-subcategory="binario">
+          <div class="app-icon">♻️</div>
+          <div>
+            <strong>Complemento a 2</strong>
+            <p class="tiny">Intervalli e overflow</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="studenti" data-tool="ieee" data-subcategory="binario">
+          <div class="app-icon">🌐</div>
+          <div>
+            <strong>IEEE 754 (32 bit)</strong>
+            <p class="tiny">Encode/Decode</p>
+          </div>
+        </button>
       </div>
 
       <div class="tool-panels">
-        <article class="tool-card active" data-page="studenti" data-tool="timer">
+        <article class="tool-card active" data-page="studenti" data-tool="timer" data-subcategory="tempo">
           <header>
             <div>
               <p class="eyebrow">Focalizzazione</p>
@@ -278,7 +345,7 @@ C. Blue-fin Tuna
           </div>
         </article>
 
-        <article class="tool-card" data-page="studenti" data-tool="average">
+        <article class="tool-card" data-page="studenti" data-tool="average" data-subcategory="valutazione">
           <header>
             <div>
               <p class="eyebrow">Valutazione</p>
@@ -302,6 +369,121 @@ C. Blue-fin Tuna
           <div class="chips drawn" id="avg-list"></div>
           <div class="result" id="avg-result">Media: n/d</div>
         </article>
+
+        <article class="tool-card" data-page="studenti" data-tool="baseconv" data-subcategory="binario">
+          <header>
+            <div>
+              <p class="eyebrow">Sistemi di numerazione</p>
+              <h3>Conversione tra basi</h3>
+            </div>
+            <span class="chip">2-16</span>
+          </header>
+          <p class="muted">Inserisci un numero e converti tra basi 2-16. Utile per esercizi e verifiche rapide.</p>
+          <div class="form-grid">
+            <label>Numero di partenza
+              <input id="baseconv-input" type="text" placeholder="es: 101101 o 7F" />
+            </label>
+            <label>Base di partenza
+              <input id="baseconv-from" type="number" min="2" max="16" value="2" />
+            </label>
+            <label>Base di destinazione
+              <input id="baseconv-to" type="number" min="2" max="16" value="10" />
+            </label>
+          </div>
+          <div class="controls">
+            <button id="baseconv-run" class="btn">Converti</button>
+            <button id="baseconv-swap" class="btn ghost">Scambia basi</button>
+          </div>
+          <div class="result pre" id="baseconv-output">Inserisci un numero e premi Converti.</div>
+          <div class="parsed" id="baseconv-table"></div>
+        </article>
+
+        <article class="tool-card" data-page="studenti" data-tool="binops" data-subcategory="binario">
+          <header>
+            <div>
+              <p class="eyebrow">Calcolo binario</p>
+              <h3>Somma / sottrazione binaria</h3>
+            </div>
+            <span class="chip">Bitwise practice</span>
+          </header>
+          <p class="muted">Esegui rapidamente somme o sottrazioni tra numeri binari e confronta con il valore decimale.</p>
+          <div class="form-grid">
+            <label>Operando A (binario)
+              <input id="binops-a" type="text" placeholder="es: 1011" />
+            </label>
+            <label>Operando B (binario)
+              <input id="binops-b" type="text" placeholder="es: 110" />
+            </label>
+            <label>Operazione
+              <select id="binops-op">
+                <option value="add">Somma (A + B)</option>
+                <option value="sub">Sottrazione (A - B)</option>
+              </select>
+            </label>
+          </div>
+          <div class="controls">
+            <button id="binops-run" class="btn">Calcola</button>
+            <button id="binops-clear" class="btn text">Svuota</button>
+          </div>
+          <div class="result pre" id="binops-output">Inserisci A e B, poi Calcola.</div>
+        </article>
+
+        <article class="tool-card" data-page="studenti" data-tool="comp2" data-subcategory="binario">
+          <header>
+            <div>
+              <p class="eyebrow">Complemento a 2</p>
+              <h3>Codifica con n bit</h3>
+            </div>
+            <span class="chip">Intervallo +/-</span>
+          </header>
+          <p class="muted">Verifica la rappresentazione in complemento a 2, l'intervallo e l'eventuale overflow.</p>
+          <div class="form-grid">
+            <label>Numero decimale
+              <input id="comp2-decimal" type="number" value="-5" />
+            </label>
+            <label>Numero di bit
+              <input id="comp2-bits" type="number" value="8" min="2" max="64" />
+            </label>
+            <label>Binario (opzionale per decodifica)
+              <input id="comp2-binary" type="text" placeholder="es: 11111011" />
+            </label>
+          </div>
+          <div class="controls">
+            <button id="comp2-encode" class="btn">Decimale → comp2</button>
+            <button id="comp2-decode" class="btn ghost">comp2 → decimale</button>
+          </div>
+          <div class="result pre" id="comp2-output">Inserisci un numero e premi un'azione.</div>
+        </article>
+
+        <article class="tool-card" data-page="studenti" data-tool="ieee" data-subcategory="binario">
+          <header>
+            <div>
+              <p class="eyebrow">Virgola mobile</p>
+              <h3>IEEE 754 (32 bit)</h3>
+            </div>
+            <span class="chip">Encode/Decode</span>
+          </header>
+          <p class="muted">Passa da decimale a bit/hex e viceversa per il formato single precision.</p>
+          <div class="form-grid">
+            <label>Valore decimale
+              <input id="ieee-decimal" type="text" placeholder="es: 6.5 o -2.5" />
+            </label>
+            <label>Bits/hex (32 bit)
+              <input id="ieee-hex" type="text" placeholder="es: 40d00000 o 01000000110100000000000000000000" />
+            </label>
+          </div>
+          <div class="bit-grid" id="ieee-bits">
+            <div class="bit-row" data-section="sign"><span class="tiny">Segno</span></div>
+            <div class="bit-row" data-section="exp"><span class="tiny">Esponente</span></div>
+            <div class="bit-row" data-section="mant"><span class="tiny">Mantissa</span></div>
+          </div>
+          <div class="controls">
+            <button id="ieee-encode" class="btn">Decimale → IEEE</button>
+            <button id="ieee-decode" class="btn ghost">IEEE → Decimale</button>
+            <button id="ieee-apply-bits" class="btn text">Applica bit</button>
+          </div>
+          <div class="result pre" id="ieee-output">Inserisci un valore e premi un'azione.</div>
+        </article>
       </div>
     </section>
   </main>
@@ -310,10 +492,6 @@ C. Blue-fin Tuna
     <div>
       <h4>Edu Tools</h4>
       <p class="muted">Piccoli strumenti didattici, sempre con te.</p>
-    </div>
-    <div class="footer__cta">
-      <button class="btn ghost" data-page-btn="docente">Docente</button>
-      <button class="btn text" data-page-btn="studenti">Studenti</button>
     </div>
   </footer>
 
