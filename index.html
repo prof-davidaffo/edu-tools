@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6244956152734111"
+     crossorigin="anonymous"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1021" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon-192.png" sizes="192x192" />
+  <link rel="icon" href="./icons/icon-512.png" sizes="512x512" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Edu Tools</title>
+</head>
+<body>
+  <div class="grain"></div>
+  <header class="topbar">
+    <div class="brand">Edu Tools</div>
+    <div class="top-actions">
+      <span class="pill">PWA</span>
+      <button class="tab-btn active" data-page-btn="docente">Docente</button>
+      <button class="tab-btn" data-page-btn="studenti">Studenti</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Raccolta strumenti</p>
+      <h1>Strumenti didattici pronti all'uso</h1>
+      <p class="lede">Benvenuto, qui potrai usare gli strumenti didattici del Prof. Davide Daffonchio. Ci sono sia strumenti per docenti che per studenti.</p>
+      <div class="hero__actions">
+        <button class="btn" data-page-btn="docente">Strumenti Docente</button>
+        <button class="btn ghost" data-page-btn="studenti">Strumenti Studente</button>
+      </div>
+      <p class="install-hint">Suggerimento: aggiungi alla schermata Home per l'uso offline.</p>
+    </div>
+    <div class="hero__card">
+      <p class="tag">Statistiche</p>
+      <div class="hero__stats">
+        <div>
+          <span class="tiny">Strumenti</span>
+          <strong>6</strong>
+        </div>
+        <div>
+          <span class="tiny">Categorie</span>
+          <strong>2</strong>
+        </div>
+      </div>
+      <div class="spark"></div>
+    </div>
+  </section>
+
+  <main>
+    <section class="page active" id="page-docente" data-page="docente">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Docente</p>
+          <h2>Seleziona uno strumento</h2>
+          <p class="muted">Un launcher compatto: clicca un'icona per aprire solo lo strumento che ti serve.</p>
+        </div>
+      </div>
+      <div class="app-launcher">
+        <button class="app-card active" data-page="docente" data-tool="exhaustive">
+          <div class="app-icon">🎲</div>
+          <div>
+            <strong>Estrazione ad esaurimento</strong>
+            <p class="tiny">Ordine casuale 1..N</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="docente" data-tool="targeted">
+          <div class="app-icon">🎯</div>
+          <div>
+            <strong>Estrazione mirata</strong>
+            <p class="tiny">Liste classi salvate</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="docente" data-tool="grade">
+          <div class="app-icon">📊</div>
+          <div>
+            <strong>Conversione voto</strong>
+            <p class="tiny">Scala /10 + correzione</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="docente" data-tool="forms">
+          <div class="app-icon">🧾</div>
+          <div>
+            <strong>Text → Google Forms</strong>
+            <p class="tiny">Script App Script</p>
+          </div>
+        </button>
+      </div>
+
+      <div class="tool-panels">
+        <article class="tool-card active" data-page="docente" data-tool="exhaustive">
+          <header>
+            <div>
+              <p class="eyebrow">Estrazione</p>
+              <h3>Estrazione ad esaurimento</h3>
+            </div>
+            <span class="chip">Classe intera</span>
+          </header>
+          <p class="muted">Mescola gli studenti da 1 a N ed estrai progressivamente senza ripetizioni.</p>
+          <div class="form-row">
+            <label for="exhaustive-count">Numero studenti</label>
+            <input id="exhaustive-count" type="number" min="1" value="31" />
+          </div>
+          <div class="controls">
+            <button id="exhaustive-shuffle" class="btn">Mescola</button>
+            <button id="exhaustive-next" class="btn ghost">Pesca prossimo</button>
+            <button id="exhaustive-reset" class="btn text">Reset</button>
+          </div>
+          <div class="status" id="exhaustive-status">Inizia con "Mescola" per creare l'ordine.</div>
+          <div class="chips drawn" id="exhaustive-output"></div>
+        </article>
+
+        <article class="tool-card" data-page="docente" data-tool="targeted">
+          <header>
+            <div>
+              <p class="eyebrow">Estrazione</p>
+              <h3>Estrazione mirata</h3>
+            </div>
+            <span class="chip">Classi salvate</span>
+          </header>
+          <p class="muted">Gestisci le tue classi, salva i nomi e riusali: mischia ed estrai senza ripetizioni.</p>
+          <div class="form-grid">
+            <label>Classe salvata
+              <select id="targeted-class-select"></select>
+            </label>
+            <label>Nome classe (per salvare/aggiornare)
+              <input id="targeted-class-name" type="text" placeholder="Es: 2A Informatica" />
+            </label>
+          </div>
+          <label for="targeted-names">Elenco studenti (uno per riga)</label>
+          <textarea id="targeted-names" class="tall" placeholder="Inserisci i nomi..."></textarea>
+          <div class="controls">
+            <button id="targeted-save" class="btn">Salva / aggiorna classe</button>
+            <button id="targeted-delete" class="btn text">Elimina classe</button>
+          </div>
+          <div class="controls">
+            <button id="targeted-shuffle" class="btn">Mescola</button>
+            <button id="targeted-next" class="btn ghost">Pesca prossimo</button>
+            <button id="targeted-reset" class="btn text">Reset</button>
+          </div>
+          <div class="status" id="targeted-status">Pronto a mescolare.</div>
+          <div class="chips drawn" id="targeted-output"></div>
+        </article>
+
+        <article class="tool-card" data-page="docente" data-tool="grade">
+          <header>
+            <div>
+              <p class="eyebrow">Valutazione</p>
+              <h3>Conversione in voto</h3>
+            </div>
+            <span class="chip">Scala /10</span>
+          </header>
+          <p class="muted">Inserisci punteggio, massimo e fattore correttivo per ottenere il voto finale.</p>
+          <div class="form-grid">
+            <label>Punteggio
+              <input id="score-current" type="number" value="41" step="0.5" />
+            </label>
+            <label>Punteggio max
+              <input id="score-max" type="number" value="47" />
+            </label>
+            <label>Fattore correttivo
+              <input id="score-adjust" type="number" value="0" step="0.1" />
+            </label>
+          </div>
+          <div class="meter">
+            <div class="meter__bar" id="grade-meter"></div>
+          </div>
+          <div class="result" id="grade-result">Voto: 8.72 / 10</div>
+          <p class="tiny" id="grade-notes">Note: valori arrotondati a due decimali.</p>
+        </article>
+
+        <article class="tool-card wide" data-page="docente" data-tool="forms">
+          <header>
+            <div>
+              <p class="eyebrow">Automazione</p>
+              <h3>Text → Google Forms</h3>
+            </div>
+            <span class="chip">App Script</span>
+          </header>
+          <p class="muted">Incolla il testo del quiz, scegli se attivare la modalità quiz o il limite di risposte e ottieni lo script pronto.</p>
+          <div class="form-grid">
+            <label>Titolo del form
+              <input id="form-title" type="text" value="Verifica esempio" />
+            </label>
+            <label class="checkbox-inline">
+              <input id="form-quiz-mode" type="checkbox" checked /> Modalità quiz
+            </label>
+            <label class="checkbox-inline">
+              <input id="form-limit" type="checkbox" checked /> Limita risposte multiple
+            </label>
+            <label>Numero massimo risposte
+              <input id="form-limit-value" type="number" value="3" min="1" />
+            </label>
+          </div>
+          <label for="form-input">Quiz di partenza</label>
+          <textarea id="form-input" class="tall" placeholder="Inserisci le domande seguendo il formato numerato con a/b/c e * per le risposte corrette.">1. What is the color of the sky?
+a) Orange
+*b) Blue
+c) Green
+d) Violet
+
+2. Which ones of these animals are warm-blooded? (Select all that apply)
+*A. Dolphin
+B. Salmon
+C. Blue-fin Tuna
+*D. Blue Whale
+
+3. In your society, to what extent is it acceptable for public money to be used for the acquisition of works of art?</textarea>
+          <div class="controls">
+            <button id="form-convert" class="btn">Converti</button>
+            <button id="form-copy" class="btn ghost">Copia script</button>
+            <button id="form-download" class="btn text">Scarica .gs</button>
+          </div>
+          <div class="result pre" id="form-output">function myFunction() { /* clicca Converti */ }</div>
+          <div class="parsed" id="form-preview"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="page-studenti" data-page="studenti">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Studenti</p>
+          <h2>Seleziona uno strumento</h2>
+          <p class="muted">Launcher essenziale per timer e media.</p>
+        </div>
+      </div>
+      <div class="app-launcher">
+        <button class="app-card active" data-page="studenti" data-tool="timer">
+          <div class="app-icon">⏱️</div>
+          <div>
+            <strong>Timer di concentrazione</strong>
+            <p class="tiny">Focus/Pausa</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="studenti" data-tool="average">
+          <div class="app-icon">📈</div>
+          <div>
+            <strong>Calcolatore media</strong>
+            <p class="tiny">Voti con peso</p>
+          </div>
+        </button>
+      </div>
+
+      <div class="tool-panels">
+        <article class="tool-card active" data-page="studenti" data-tool="timer">
+          <header>
+            <div>
+              <p class="eyebrow">Focalizzazione</p>
+              <h3>Timer di concentrazione</h3>
+            </div>
+            <span class="chip">Pomodoro light</span>
+          </header>
+          <p class="muted">Imposta minuti di studio e pausa, avvia il conto alla rovescia e ricevi un segnale visivo.</p>
+          <div class="form-grid">
+            <label>Studio (min)
+              <input id="focus-minutes" type="number" value="25" min="1" />
+            </label>
+            <label>Pausa (min)
+              <input id="break-minutes" type="number" value="5" min="1" />
+            </label>
+          </div>
+          <div class="timer-ring">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="54" class="ring-bg" />
+              <circle cx="60" cy="60" r="54" class="ring-progress" id="timer-progress" />
+            </svg>
+            <div class="timer-value" id="timer-display">25:00</div>
+            <div class="tiny" id="timer-mode">Pronto</div>
+          </div>
+          <div class="controls">
+            <button id="timer-toggle" class="btn">Avvia</button>
+            <button id="timer-reset" class="btn text">Reset</button>
+          </div>
+        </article>
+
+        <article class="tool-card" data-page="studenti" data-tool="average">
+          <header>
+            <div>
+              <p class="eyebrow">Valutazione</p>
+              <h3>Calcolatore media voti</h3>
+            </div>
+            <span class="chip">Peso personalizzato</span>
+          </header>
+          <p class="muted">Aggiungi voti e pesi per stimare la media. Utile per pianificare gli obiettivi.</p>
+          <div class="form-grid">
+            <label>Voto
+              <input id="avg-grade" type="number" step="0.1" min="1" max="10" />
+            </label>
+            <label>Peso
+              <input id="avg-weight" type="number" step="0.5" min="0.5" value="1" />
+            </label>
+          </div>
+          <div class="controls">
+            <button id="avg-add" class="btn">Aggiungi</button>
+            <button id="avg-clear" class="btn text">Svuota</button>
+          </div>
+          <div class="chips drawn" id="avg-list"></div>
+          <div class="result" id="avg-result">Media: n/d</div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>
+      <h4>Edu Tools</h4>
+      <p class="muted">Piccoli strumenti didattici, sempre con te.</p>
+    </div>
+    <div class="footer__cta">
+      <button class="btn ghost" data-page-btn="docente">Docente</button>
+      <button class="btn text" data-page-btn="studenti">Studenti</button>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
