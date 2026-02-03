@@ -26,7 +26,6 @@
     <div>
       <p class="eyebrow">Raccolta strumenti</p>
       <h1>Strumenti didattici pronti all'uso</h1>
-      <p class="lede">Benvenuto, qui potrai usare gli strumenti didattici del Prof. Davide Daffonchio. Ci sono sia strumenti per docenti che per studenti.</p>
       <div class="cat-switch">
         <button class="app-card hero-cat active" data-page-btn="studenti">
           <div class="app-icon">🎓</div>
@@ -38,20 +37,6 @@
         </button>
       </div>
       <p class="install-hint">Suggerimento: aggiungi alla schermata Home per l'uso offline.</p>
-    </div>
-    <div class="hero__card">
-      <p class="tag">Statistiche</p>
-      <div class="hero__stats">
-        <div>
-          <span class="tiny">Strumenti</span>
-          <strong>8</strong>
-        </div>
-        <div>
-          <span class="tiny">Categorie</span>
-          <strong>2</strong>
-        </div>
-      </div>
-      <div class="spark"></div>
     </div>
   </section>
 
@@ -82,7 +67,14 @@
         </div>
       </div>
       <div class="app-launcher">
-        <button class="app-card active" data-page="docente" data-tool="exhaustive" data-subcategory="estrazione">
+        <button class="app-card active" data-page="docente" data-tool="class-manager" data-subcategory="estrazione">
+          <div class="app-icon">🧩</div>
+          <div>
+            <strong>Gestione classi</strong>
+            <p class="tiny">Salva e aggiorna elenchi</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="docente" data-tool="exhaustive" data-subcategory="estrazione">
           <div class="app-icon">🎲</div>
           <div>
             <strong>Estrazione ad esaurimento</strong>
@@ -94,6 +86,13 @@
           <div>
             <strong>Estrazione mirata</strong>
             <p class="tiny">Liste classi salvate</p>
+          </div>
+        </button>
+        <button class="app-card" data-page="docente" data-tool="groups" data-subcategory="estrazione">
+          <div class="app-icon">👥</div>
+          <div>
+            <strong>Gruppi casuali</strong>
+            <p class="tiny">Classi salvate</p>
           </div>
         </button>
         <button class="app-card" data-page="docente" data-tool="grade" data-subcategory="valutazione">
@@ -113,7 +112,33 @@
       </div>
 
       <div class="tool-panels">
-        <article class="tool-card active" data-page="docente" data-tool="exhaustive" data-subcategory="estrazione">
+        <article class="tool-card active" data-page="docente" data-tool="class-manager" data-subcategory="estrazione" id="class-manager">
+          <header>
+            <div>
+              <p class="eyebrow">Gestione classi</p>
+              <h3>Salva e aggiorna classi</h3>
+            </div>
+            <span class="chip">Condivise</span>
+          </header>
+          <p class="muted">Aggiungi classi e studenti una sola volta. Gli strumenti di estrazione le useranno automaticamente.</p>
+          <div class="form-grid">
+            <label>Classe salvata
+              <select id="manager-class-select"></select>
+            </label>
+            <label>Nome classe (per salvare/aggiornare)
+              <input id="manager-class-name" type="text" placeholder="Es: 2A Informatica" />
+            </label>
+          </div>
+          <label for="manager-names">Elenco studenti (uno per riga)</label>
+          <textarea id="manager-names" class="tall" placeholder="Inserisci i nomi..."></textarea>
+          <div class="controls">
+            <button id="manager-save" class="btn">Salva / aggiorna classe</button>
+            <button id="manager-delete" class="btn text">Elimina classe</button>
+          </div>
+          <div class="status" id="manager-status">Crea o seleziona una classe.</div>
+        </article>
+
+        <article class="tool-card" data-page="docente" data-tool="exhaustive" data-subcategory="estrazione">
           <header>
             <div>
               <p class="eyebrow">Estrazione</p>
@@ -148,15 +173,10 @@
             <label>Classe salvata
               <select id="targeted-class-select"></select>
             </label>
-            <label>Nome classe (per salvare/aggiornare)
-              <input id="targeted-class-name" type="text" placeholder="Es: 2A Informatica" />
-            </label>
-          </div>
-          <label for="targeted-names">Elenco studenti (uno per riga)</label>
-          <textarea id="targeted-names" class="tall" placeholder="Inserisci i nomi..."></textarea>
-          <div class="controls">
-            <button id="targeted-save" class="btn">Salva / aggiorna classe</button>
-            <button id="targeted-delete" class="btn text">Elimina classe</button>
+            <div>
+              <p class="tiny">Gestione classi</p>
+              <button id="targeted-open-manager" class="btn ghost">Apri gestione</button>
+            </div>
           </div>
           <div class="controls">
             <button id="targeted-shuffle" class="btn">Mescola</button>
@@ -165,6 +185,41 @@
           </div>
           <div class="status" id="targeted-status">Pronto a mescolare.</div>
           <div class="chips drawn" id="targeted-output"></div>
+        </article>
+
+        <article class="tool-card" data-page="docente" data-tool="groups" data-subcategory="estrazione">
+          <header>
+            <div>
+              <p class="eyebrow">Estrazione</p>
+              <h3>Gruppi casuali</h3>
+            </div>
+            <span class="chip">Classi salvate</span>
+          </header>
+          <p class="muted">Crea gruppi casuali di N persone a partire dalle classi salvate.</p>
+          <div class="form-grid">
+            <label>Classe salvata
+              <select id="groups-class-select"></select>
+            </label>
+            <label>Numero persone per gruppo
+              <input id="groups-size" type="number" min="1" value="3" />
+            </label>
+            <label>Gestione resti
+              <select id="groups-remainder-mode">
+                <option value="small-last" selected>Gruppo finale più piccolo</option>
+                <option value="distribute">Distribuisci gli avanzi (+1 ai primi)</option>
+              </select>
+            </label>
+          </div>
+          <div class="controls">
+            <button id="groups-open-manager" class="btn ghost">Apri gestione classi</button>
+          </div>
+          <div class="controls">
+            <button id="groups-generate" class="btn">Genera gruppi</button>
+            <button id="groups-reshuffle" class="btn ghost">Rimescola</button>
+            <button id="groups-reload" class="btn text">Ricarica classi</button>
+          </div>
+          <div class="status" id="groups-status">Seleziona una classe e scegli la dimensione dei gruppi.</div>
+          <div class="groups" id="groups-output"></div>
         </article>
 
         <article class="tool-card" data-page="docente" data-tool="grade" data-subcategory="valutazione">

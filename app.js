@@ -23,11 +23,41 @@ function renderChips(container, items) {
   });
 }
 
+function renderGroups(container, groups) {
+  container.innerHTML = '';
+  if (!groups.length) {
+    container.innerHTML = '<span class="tiny">Nessun gruppo generato.</span>';
+    return;
+  }
+  groups.forEach((group, idx) => {
+    const card = document.createElement('div');
+    card.className = 'group-card';
+    const title = document.createElement('div');
+    title.className = 'group-title';
+    title.textContent = `Gruppo ${idx + 1}`;
+    const list = document.createElement('div');
+    list.className = 'group-list';
+    group.forEach((name) => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = name;
+      list.appendChild(chip);
+    });
+    card.appendChild(title);
+    card.appendChild(list);
+    container.appendChild(card);
+  });
+}
+
+function notifyClassesUpdated() {
+  document.dispatchEvent(new CustomEvent('classes:updated'));
+}
+
 // ----- Pagine e launcher -----
 const viewState = {
   page: 'studenti',
   selected: {
-    docente: 'exhaustive',
+    docente: 'class-manager',
     studenti: 'timer'
   },
   subcat: {
@@ -176,10 +206,7 @@ function saveClasses(classes) {
 
 function initTargetedDraw() {
   const classSelect = document.getElementById('targeted-class-select');
-  const nameInput = document.getElementById('targeted-class-name');
-  const namesArea = document.getElementById('targeted-names');
-  const saveBtn = document.getElementById('targeted-save');
-  const deleteBtn = document.getElementById('targeted-delete');
+  const openManagerBtn = document.getElementById('targeted-open-manager');
   const shuffleBtn = document.getElementById('targeted-shuffle');
   const nextBtn = document.getElementById('targeted-next');
   const resetBtn = document.getElementById('targeted-reset');
@@ -205,12 +232,97 @@ function initTargetedDraw() {
 
   function loadSelectedClass() {
     const key = classSelect.value;
+    if (!key || !classes[key]) {
+      statusEl.textContent = 'Seleziona una classe valida.';
+    } else {
+      statusEl.textContent = `Classe "${key}" pronta per l'estrazione.`;
+    }
+  }
+
+  function shuffle() {
+    const key = classSelect.value;
+    const list = key && classes[key] ? classes[key] : [];
+    if (!list.length) {
+      statusEl.textContent = 'Nessun nome in elenco. Apri la gestione classi.';
+      renderChips(outputEl, []);
+      return;
+    }
+    state.pool = shuffleArray([...list]);
+    state.drawn = [];
+    statusEl.textContent = `Mischiati ${list.length} nomi. Pronto a pescare.`;
+    renderChips(outputEl, state.drawn);
+  }
+
+  function drawNext() {
+    if (!state.pool.length) {
+      statusEl.textContent = 'Elenco terminato o non creato. Premi Mescola per ripartire.';
+      return;
+    }
+    const value = state.pool.shift();
+    state.drawn.push(value);
+    statusEl.textContent = `Estratto: ${value}`;
+    renderChips(outputEl, state.drawn);
+  }
+
+  function reset() {
+    state.pool = [];
+    state.drawn = [];
+    statusEl.textContent = 'Reset effettuato. Seleziona una classe e premi Mescola.';
+    renderChips(outputEl, state.drawn);
+  }
+
+  classSelect.addEventListener('change', loadSelectedClass);
+  openManagerBtn?.addEventListener('click', () => {
+    selectTool('docente', 'class-manager');
+    document.getElementById('class-manager')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  shuffleBtn.addEventListener('click', shuffle);
+  nextBtn.addEventListener('click', drawNext);
+  resetBtn.addEventListener('click', reset);
+
+  document.addEventListener('classes:updated', () => {
+    classes = loadClasses();
+    refreshSelect();
+  });
+
+  refreshSelect();
+}
+
+// ----- Gestione classi (condivisa) -----
+function initClassManager() {
+  const classSelect = document.getElementById('manager-class-select');
+  const nameInput = document.getElementById('manager-class-name');
+  const namesArea = document.getElementById('manager-names');
+  const saveBtn = document.getElementById('manager-save');
+  const deleteBtn = document.getElementById('manager-delete');
+  const statusEl = document.getElementById('manager-status');
+
+  let classes = loadClasses();
+
+  function refreshSelect() {
+    classSelect.innerHTML = '';
+    Object.keys(classes).forEach((key) => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = key;
+      classSelect.appendChild(opt);
+    });
+    if (!classSelect.value && classSelect.options.length) {
+      classSelect.value = classSelect.options[0].value;
+    }
+    loadSelectedClass();
+  }
+
+  function loadSelectedClass() {
+    const key = classSelect.value;
     if (key && classes[key]) {
       nameInput.value = key;
       namesArea.value = classes[key].join('\n');
+      statusEl.textContent = `Classe "${key}" caricata.`;
     } else {
       nameInput.value = '';
       namesArea.value = '';
+      statusEl.textContent = 'Crea una nuova classe o selezionane una.';
     }
   }
 
@@ -237,6 +349,7 @@ function initTargetedDraw() {
     statusEl.textContent = `Classe "${name}" salvata (${names.length} nomi).`;
     refreshSelect();
     classSelect.value = name;
+    notifyClassesUpdated();
   }
 
   function deleteClass() {
@@ -250,47 +363,133 @@ function initTargetedDraw() {
     statusEl.textContent = `Classe "${key}" eliminata.`;
     refreshSelect();
     namesArea.value = '';
-  }
-
-  function shuffle() {
-    const list = parseNames();
-    if (!list.length) {
-      statusEl.textContent = 'Nessun nome in elenco. Aggiungi nomi e salva/mescola.';
-      renderChips(outputEl, []);
-      return;
-    }
-    state.pool = shuffleArray([...list]);
-    state.drawn = [];
-    statusEl.textContent = `Mischiati ${list.length} nomi. Pronto a pescare.`;
-    renderChips(outputEl, state.drawn);
-  }
-
-  function drawNext() {
-    if (!state.pool.length) {
-      statusEl.textContent = 'Elenco terminato o non creato. Premi Mescola per ripartire.';
-      return;
-    }
-    const value = state.pool.shift();
-    state.drawn.push(value);
-    statusEl.textContent = `Estratto: ${value}`;
-    renderChips(outputEl, state.drawn);
-  }
-
-  function reset() {
-    state.pool = [];
-    state.drawn = [];
-    statusEl.textContent = 'Reset effettuato. Seleziona o salva una classe e premi Mescola.';
-    renderChips(outputEl, state.drawn);
+    notifyClassesUpdated();
   }
 
   classSelect.addEventListener('change', loadSelectedClass);
   saveBtn.addEventListener('click', saveClass);
   deleteBtn.addEventListener('click', deleteClass);
-  shuffleBtn.addEventListener('click', shuffle);
-  nextBtn.addEventListener('click', drawNext);
-  resetBtn.addEventListener('click', reset);
 
   refreshSelect();
+}
+
+// ----- Gruppi casuali con classi salvate -----
+function initGroupGenerator() {
+  const classSelect = document.getElementById('groups-class-select');
+  const sizeInput = document.getElementById('groups-size');
+  const remainderSelect = document.getElementById('groups-remainder-mode');
+  const generateBtn = document.getElementById('groups-generate');
+  const reshuffleBtn = document.getElementById('groups-reshuffle');
+  const reloadBtn = document.getElementById('groups-reload');
+  const openManagerBtn = document.getElementById('groups-open-manager');
+  const statusEl = document.getElementById('groups-status');
+  const outputEl = document.getElementById('groups-output');
+
+  let classes = loadClasses();
+  let lastList = [];
+
+  function refreshSelect() {
+    classSelect.innerHTML = '';
+    Object.keys(classes).forEach((key) => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = key;
+      classSelect.appendChild(opt);
+    });
+    if (!classSelect.value && classSelect.options.length) {
+      classSelect.value = classSelect.options[0].value;
+    }
+  }
+
+  function getSelectedNames() {
+    const key = classSelect.value;
+    if (!key || !classes[key]) return [];
+    return classes[key];
+  }
+
+  function getRemainderMode() {
+    return remainderSelect?.value || 'small-last';
+  }
+
+  function buildGroups(list, size) {
+    const shuffled = shuffleArray([...list]);
+    if (!shuffled.length) return [];
+
+    const total = shuffled.length;
+    const baseGroups = Math.floor(total / size);
+    const remainder = total % size;
+    const groups = [];
+    const remainderMode = getRemainderMode();
+
+    if (remainder === 0 || remainderMode === 'small-last') {
+      for (let i = 0; i < shuffled.length; i += size) {
+        groups.push(shuffled.slice(i, i + size));
+      }
+      return groups;
+    }
+
+    if (remainderMode === 'distribute' && baseGroups > 0) {
+      let index = 0;
+      for (let g = 0; g < baseGroups; g += 1) {
+        const extra = g < remainder ? 1 : 0;
+        const groupSize = size + extra;
+        groups.push(shuffled.slice(index, index + groupSize));
+        index += groupSize;
+      }
+      return groups;
+    }
+
+    for (let i = 0; i < shuffled.length; i += size) {
+      groups.push(shuffled.slice(i, i + size));
+    }
+    return groups;
+  }
+
+  function generate(useLast = false) {
+    const size = Number(sizeInput.value);
+    if (!Number.isFinite(size) || size <= 0) {
+      statusEl.textContent = 'Inserisci una dimensione valida per i gruppi.';
+      renderGroups(outputEl, []);
+      return;
+    }
+    const list = useLast && lastList.length ? lastList : getSelectedNames();
+    if (!list.length) {
+      statusEl.textContent = 'Seleziona una classe con almeno un nome.';
+      renderGroups(outputEl, []);
+      return;
+    }
+    lastList = list;
+    const groups = buildGroups(list, Math.max(1, Math.floor(size)));
+    const remainderMode = getRemainderMode();
+    const mode = remainderMode === 'distribute' ? 'Distribuiti gli avanzi' : 'Gruppo finale più piccolo se necessario';
+    statusEl.textContent = `Creati ${groups.length} gruppi da ${size}. ${mode}.`;
+    renderGroups(outputEl, groups);
+  }
+
+  function reloadClasses() {
+    classes = loadClasses();
+    refreshSelect();
+    statusEl.textContent = 'Classi ricaricate. Puoi generare i gruppi.';
+  }
+
+  classSelect.addEventListener('change', () => {
+    statusEl.textContent = 'Classe aggiornata. Premi "Genera gruppi".';
+  });
+  generateBtn.addEventListener('click', () => generate(false));
+  reshuffleBtn.addEventListener('click', () => generate(true));
+  reloadBtn.addEventListener('click', reloadClasses);
+  openManagerBtn?.addEventListener('click', () => {
+    selectTool('docente', 'class-manager');
+    document.getElementById('class-manager')?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  document.addEventListener('classes:updated', () => {
+    classes = loadClasses();
+    refreshSelect();
+  });
+
+  refreshSelect();
+  renderGroups(outputEl, []);
 }
 
 // ----- Conversione voto -----
@@ -963,7 +1162,9 @@ async function clearServiceWorkersAndCaches() {
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initExhaustiveDraw();
+  initClassManager();
   initTargetedDraw();
+  initGroupGenerator();
   initGradeConverter();
   initFormConverter();
   initTimer();
